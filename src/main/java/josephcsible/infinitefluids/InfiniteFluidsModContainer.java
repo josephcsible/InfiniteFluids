@@ -34,7 +34,7 @@ public class InfiniteFluidsModContainer extends DummyModContainer {
 		metadata.version = "0.1.0";
 		metadata.name = "InfiniteFluids";
 		metadata.description = "Allows fluids other than water to be infinite (i.e., turn non-source blocks next to source blocks into source blocks).";
-		metadata.url = "";
+		metadata.url = "http://minecraft.curseforge.com/projects/infinitefluids";
 		metadata.authorList.add("Joseph C. Sible");
 	}
 

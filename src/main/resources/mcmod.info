@@ -5,7 +5,7 @@
   "description": "Allows fluids other than water to be infinite (i.e., turn non-source blocks next to source blocks into source blocks).",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "http://minecraft.curseforge.com/projects/infinitefluids",
   "updateUrl": "",
   "authorList": ["Joseph C. Sible"],
   "credits": "",

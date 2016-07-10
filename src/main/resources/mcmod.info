@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "infinitefluids",
+  "name": "InfiniteFluids",
+  "description": "Allows fluids other than water to be infinite (i.e., turn non-source blocks next to source blocks into source blocks).",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["Joseph C. Sible"],
+  "credits": "",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

@@ -36,7 +36,7 @@ contributions under this mod's license.
 ## Licensing/Permissions
 
 ### What license is this released under?
-It's released under the LGPL v2.1 or later.
+It's released under the GPL v2 or later.
 
 ### Can I use this in my modpack?
 Yes, even if you monetize it with adf.ly or something, and you don't need to

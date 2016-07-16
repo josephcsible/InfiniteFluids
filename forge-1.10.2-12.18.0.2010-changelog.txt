@@ -1,6 +1,0 @@
-Changelog:
-Build 1.10.2-12.18.0.2010:
-	bernhard.bonigl:
-		Add an event that allows to modify the looting level based on damage
-		source
-

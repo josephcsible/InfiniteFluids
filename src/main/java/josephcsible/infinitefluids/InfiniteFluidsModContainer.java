@@ -19,20 +19,38 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package josephcsible.infinitefluids;
 
-import com.google.common.eventbus.EventBus;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.ModMetadata;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class InfiniteFluidsModContainer extends DummyModContainer {
+	public static Configuration config;
+	public static boolean invertInsideNether, invertOutsideNether;
+	public static Set<String> fluidsInsideNether, fluidsOutsideNether;
+	public static final String[] INSIDE_NETHER_DEFAULT = {}, OUTSIDE_NETHER_DEFAULT = {"minecraft:water"};
+
+	// XXX duplication with mcmod.info and build.gradle
+	public static final String MODID = "infinitefluids";
+	public static final String VERSION = "1.0.1";
+
 	public InfiniteFluidsModContainer() {
 		super(new ModMetadata());
 		ModMetadata metadata = getMetadata();
-		// XXX almost all this is duplicated between here and mcmod.info
-		metadata.modId = "infinitefluids";
-		// XXX version is duplicated between here and build.gradle
-		metadata.version = "0.1.0";
+		metadata.modId = MODID;
+		metadata.version = VERSION;
 		metadata.name = "InfiniteFluids";
 		metadata.description = "Allows fluids other than water to be infinite (i.e., turn non-source blocks next to source blocks into source blocks).";
 		metadata.url = "http://minecraft.curseforge.com/projects/infinitefluids";
@@ -40,7 +58,53 @@ public class InfiniteFluidsModContainer extends DummyModContainer {
 	}
 
 	@Override
+	public String getGuiClassName() {
+		return InfiniteFluidsGuiFactory.class.getName();
+	}
+
+	@Override
 	public boolean registerBus(EventBus bus, LoadController controller) {
-		return true; // even if we don't have anything to register for, if we return false, Forge says we're not loaded
+		bus.register(this);
+		return true;
+	}
+
+	@Subscribe
+	public void preInit(FMLPreInitializationEvent event) {
+		config = new Configuration(event.getSuggestedConfigurationFile());
+		syncConfig();
+	}
+
+	@Subscribe
+	public void init(FMLInitializationEvent event) {
+		MinecraftForge.EVENT_BUS.register(this);
+	}
+
+	@SubscribeEvent
+	public void onConfigChanged(OnConfigChangedEvent eventArgs) {
+		if(eventArgs.getModID().equals(MODID))
+			syncConfig();
+	}
+
+	protected static void fixVanillaFlowing(Set<String> s) {
+		if(s.contains("minecraft:water")) {
+			s.remove("minecraft:water");
+			s.add("minecraft:flowing_water");
+		}
+		if(s.contains("minecraft:lava")) {
+			s.remove("minecraft:lava");
+			s.add("minecraft:flowing_lava");
+		}
+	}
+
+	protected static void syncConfig() {
+		config.setCategoryComment(Configuration.CATEGORY_GENERAL, "Use block names (like with /setblock) here, such as minecraft:lava or tconstruct:blueslime.");
+		fluidsOutsideNether = new HashSet<String>(Arrays.asList(config.getStringList("fluidsOutsideNether", Configuration.CATEGORY_GENERAL, OUTSIDE_NETHER_DEFAULT, "A list of fluids that will be infinite outside of the Nether (or any mod-added dimensions where water can't be placed)")));
+		fixVanillaFlowing(fluidsOutsideNether);
+		invertOutsideNether = config.getBoolean("invertOutsideNether", Configuration.CATEGORY_GENERAL, false, "Whether to invert the function of fluidsOutsideNether (i.e., make all fluids infinite except those listed)");
+		fluidsInsideNether = new HashSet<String>(Arrays.asList(config.getStringList("fluidsInsideNether", Configuration.CATEGORY_GENERAL, INSIDE_NETHER_DEFAULT, "A list of fluids that will be infinite inside of the Nether (and any mod-added dimensions where water can't be placed)")));
+		fixVanillaFlowing(fluidsInsideNether);
+		invertInsideNether = config.getBoolean("invertInsideNether", Configuration.CATEGORY_GENERAL, false, "Whether to invert the function of fluidsInsideNether (i.e., make all fluids infinite except those listed)");
+		if(config.hasChanged())
+			config.save();
 	}
 }

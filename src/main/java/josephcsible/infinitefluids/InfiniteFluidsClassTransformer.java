@@ -19,8 +19,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package josephcsible.infinitefluids;
 
+import java.util.Iterator;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import static org.objectweb.asm.Opcodes.*;
@@ -28,13 +31,28 @@ import static org.objectweb.asm.Opcodes.*;
 import net.minecraft.launchwrapper.IClassTransformer;
 
 public class InfiniteFluidsClassTransformer implements IClassTransformer {
+	private static String updateTickName, updateTickDesc, fluidIsInfiniteDesc, maybeCreateSourceBlockDesc;
 
-	private void transformUpdateTick(MethodNode mn) {
+	public static void setObfuscated(boolean isObfuscated) {
+		if(isObfuscated) {
+			updateTickName = "b";
+			updateTickDesc = "(Laid;Lcm;Lars;Ljava/util/Random;)V";
+			fluidIsInfiniteDesc = "(Lakf;Laid;)Z";
+			maybeCreateSourceBlockDesc = "(Lnet/minecraftforge/fluids/BlockFluidClassic;Laid;Lcm;Lars;)V";
+		} else {
+			updateTickName = "updateTick";
+			updateTickDesc = "(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V";
+			fluidIsInfiniteDesc = "(Lnet/minecraft/block/Block;Lnet/minecraft/world/World;)Z";
+			maybeCreateSourceBlockDesc = "(Lnet/minecraftforge/fluids/BlockFluidClassic;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)V";
+		}
+	}
+
+	private static void transformVanillaUpdateTick(MethodNode mn) {
 		/*
 		We're trying to change this:
 		if (this.adjacentSourceBlocks >= 2 && this.blockMaterial == Material.WATER)
 		to this:
-		if (this.adjacentSourceBlocks >= 2 && InfiniteFluidsHooks.shouldCreateSourceBlock(this, worldIn, pos, state, rand))
+		if (this.adjacentSourceBlocks >= 2 && InfiniteFluidsHooks.fluidIsInfinite(this, worldIn))
 
 		Here's the relevant piece of the bytecode:
 		L18
@@ -50,8 +68,6 @@ public class InfiniteFluidsClassTransformer implements IClassTransformer {
 		GETSTATIC net/minecraft/block/material/Material.WATER : Lnet/minecraft/block/material/Material; *** removed
 		IF_ACMPNE L22 *** removed
 		*/
-
-		final String hookDesc = InfiniteFluidsLoadingPlugin.runtimeDeobfuscationEnabled ? "(Lalm;Laid;Lcm;Lars;Ljava/util/Random;)Z" : "(Lnet/minecraft/block/BlockDynamicLiquid;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)Z";
 		AbstractInsnNode targetNode = null;
 		for (AbstractInsnNode instruction : mn.instructions.toArray())
 		{
@@ -63,10 +79,10 @@ public class InfiniteFluidsClassTransformer implements IClassTransformer {
 		}
 		if (targetNode == null)
 		{
-			System.err.println("Failed to find the part of updateTick we need to patch!");
+			System.err.println("Failed to find the part of BlockDynamicLiquid.updateTick we need to patch!");
 			return;
 		}
-		System.out.println("Patching updateTick");
+		System.out.println("Patching BlockDynamicLiquid.updateTick");
 		mn.instructions.remove(targetNode.getNext()); // remove GETFIELD
 		mn.instructions.remove(targetNode.getNext()); // remove GETSTATIC
 		JumpInsnNode n = (JumpInsnNode)targetNode.getNext();
@@ -74,18 +90,39 @@ public class InfiniteFluidsClassTransformer implements IClassTransformer {
 		mn.instructions.remove(n); // remove IF_ACMPNE
 		InsnList toInsert = new InsnList();
 		toInsert.add(new VarInsnNode(ALOAD, 1));
-		toInsert.add(new VarInsnNode(ALOAD, 2));
-		toInsert.add(new VarInsnNode(ALOAD, 3));
-		toInsert.add(new VarInsnNode(ALOAD, 4));
-		toInsert.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(InfiniteFluidsHooks.class), "shouldCreateSourceBlock", hookDesc, false));
+		toInsert.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(InfiniteFluidsHooks.class), "fluidIsInfinite", fluidIsInfiniteDesc, false));
 		toInsert.add(new JumpInsnNode(IFEQ, ln));
 		mn.instructions.insert(targetNode, toInsert);
+	}
+
+	private static void transformForgeUpdateTick(MethodNode mn) {
+		System.out.println("Patching BlockFluidClassic.updateTick");
+		// We're adding this line to the beginning of the method:
+		// InfiniteFluidsHooks.maybeCreateSourceBlock(this, world, pos, state);
+		Label oldBeginLabel = ((LabelNode)mn.instructions.getFirst()).getLabel();
+		Label beginLabel = new Label();
+		InsnList toInsert = new InsnList();
+		toInsert.add(new LabelNode(beginLabel));
+		toInsert.add(new VarInsnNode(ALOAD, 0));
+		toInsert.add(new VarInsnNode(ALOAD, 1));
+		toInsert.add(new VarInsnNode(ALOAD, 2));
+		toInsert.add(new VarInsnNode(ALOAD, 3));
+		toInsert.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(InfiniteFluidsHooks.class), "maybeCreateSourceBlock", maybeCreateSourceBlockDesc, false));
+		mn.instructions.insert(toInsert);
+		// Make sure nothing looks like it's out of scope in our injected code
+		Iterator<LocalVariableNode> iter = mn.localVariables.iterator();
+		while(iter.hasNext()) {
+			LocalVariableNode lvn = iter.next();
+			if(lvn.start.getLabel() == oldBeginLabel) {
+				lvn.start = new LabelNode(beginLabel);
+			}
+		}
 	}
 
 	private static ClassNode byteArrayToClassNode(byte[] basicClass) {
 		ClassNode cn = new ClassNode();
 		ClassReader cr = new ClassReader(basicClass);
-		cr.accept(cn, 0);
+		cr.accept(cn, ClassReader.SKIP_FRAMES);
 		return cn;
 	}
 
@@ -98,26 +135,25 @@ public class InfiniteFluidsClassTransformer implements IClassTransformer {
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass)
 	{
-		if(!transformedName.equals("net.minecraft.block.BlockDynamicLiquid")) {
-			return basicClass;
-		}
-		ClassNode cn = byteArrayToClassNode(basicClass);
-
-		String updateTickName, updateTickDesc;
-		if(InfiniteFluidsLoadingPlugin.runtimeDeobfuscationEnabled) {
-			updateTickName = "b";
-			updateTickDesc = "(Laid;Lcm;Lars;Ljava/util/Random;)V";
-		} else {
-			updateTickName = "updateTick";
-			updateTickDesc = "(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V";
-		}
-		for(MethodNode mn : cn.methods) {
-			if (mn.name.equals(updateTickName) && mn.desc.equals(updateTickDesc)) {
-				transformUpdateTick(mn);
-				return classNodeToByteArray(cn);
+		if(transformedName.equals("net.minecraft.block.BlockDynamicLiquid")) {
+			ClassNode cn = byteArrayToClassNode(basicClass);
+			for(MethodNode mn : cn.methods) {
+				if (mn.name.equals(updateTickName) && mn.desc.equals(updateTickDesc)) {
+					transformVanillaUpdateTick(mn);
+					return classNodeToByteArray(cn);
+				}
 			}
+			System.err.println("Failed to find the BlockDynamicLiquid.updateTick method!");
+		} else if(transformedName.equals("net.minecraftforge.fluids.BlockFluidClassic")) {
+			ClassNode cn = byteArrayToClassNode(basicClass);
+			for(MethodNode mn : cn.methods) {
+				if (mn.name.equals(updateTickName) && mn.desc.equals(updateTickDesc)) {
+					transformForgeUpdateTick(mn);
+					return classNodeToByteArray(cn);
+				}
+			}
+			System.err.println("Failed to find the BlockFluidClassic.updateTick method!");
 		}
-		System.err.println("Failed to find the updateTick method!");
-		return classNodeToByteArray(cn);
+		return basicClass;
 	}
 }

@@ -21,18 +21,32 @@ package josephcsible.infinitefluids;
 
 import java.util.Random;
 
-import net.minecraft.block.BlockDynamicLiquid;
-import net.minecraft.block.material.Material;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.BlockFluidClassic;
 
 public class InfiniteFluidsHooks {
-	public static boolean shouldCreateSourceBlock(BlockDynamicLiquid liquid, World worldIn, BlockPos pos, IBlockState state, Random rand) {
-		@SuppressWarnings("deprecation") // I know getMaterial is deprecated, but blockMaterial is private, and IMO this is better than reflection or an access transformer.
-		Material material = liquid.getMaterial(state);
-		if(material == Material.WATER) return true;
-		if(material == Material.LAVA && worldIn.provider.doesWaterVaporize()) return true;
-		return false;
+	public static boolean fluidIsInfinite(Block block, World world) {
+		if(world.provider.doesWaterVaporize()) {
+			return InfiniteFluidsModContainer.fluidsInsideNether.contains(Block.REGISTRY.getNameForObject(block).toString()) ^ InfiniteFluidsModContainer.invertInsideNether;
+		} else {
+			return InfiniteFluidsModContainer.fluidsOutsideNether.contains(Block.REGISTRY.getNameForObject(block).toString()) ^ InfiniteFluidsModContainer.invertOutsideNether;
+		}
+	}
+
+	public static void maybeCreateSourceBlock(BlockFluidClassic block, World world, BlockPos pos, IBlockState state) {
+		if(!block.isSourceBlock(world, pos) && fluidIsInfinite(block, world)) {
+			int adjacentSourceBlocks =
+					(block.isSourceBlock(world, pos.north()) ? 1 : 0) +
+					(block.isSourceBlock(world, pos.south()) ? 1 : 0) +
+					(block.isSourceBlock(world, pos.east()) ? 1 : 0) +
+					(block.isSourceBlock(world, pos.west()) ? 1 : 0);
+			int densityDir = block.getDensity(world, pos) > 0 ? -1 : 1;
+			if(adjacentSourceBlocks >= 2 && (world.getBlockState(pos.up(densityDir)).getMaterial().isSolid() || block.isSourceBlock(world, pos.up(densityDir)))) {
+				world.setBlockState(pos, state.withProperty(BlockFluidClassic.LEVEL, 0));
+			}
+		}
 	}
 }

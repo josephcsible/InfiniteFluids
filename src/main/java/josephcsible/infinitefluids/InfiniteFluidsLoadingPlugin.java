@@ -25,10 +25,6 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
 
 @MCVersion("1.10.2")
 public class InfiniteFluidsLoadingPlugin implements IFMLLoadingPlugin {
-
-	// XXX this feels hacky. Is this really the best way to keep track of this?
-	public static boolean runtimeDeobfuscationEnabled;
-
 	@Override
 	public String[] getASMTransformerClass() {
 		return new String[]{InfiniteFluidsClassTransformer.class.getName()};
@@ -46,7 +42,7 @@ public class InfiniteFluidsLoadingPlugin implements IFMLLoadingPlugin {
 
 	@Override
 	public void injectData(Map<String, Object> data) {
-		runtimeDeobfuscationEnabled = (Boolean) data.get("runtimeDeobfuscationEnabled");
+		InfiniteFluidsClassTransformer.setObfuscated((Boolean) data.get("runtimeDeobfuscationEnabled"));
 	}
 
 	@Override

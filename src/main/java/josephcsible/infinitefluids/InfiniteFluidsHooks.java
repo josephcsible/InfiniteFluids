@@ -20,15 +20,32 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 package josephcsible.infinitefluids;
 
 import java.util.Random;
-import net.minecraft.block.BlockDynamicLiquid;
+
+import cpw.mods.fml.common.registry.GameData;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.BlockFluidClassic;
 
 public class InfiniteFluidsHooks {
-	public static boolean shouldCreateSourceBlock(BlockDynamicLiquid liquid, World worldIn, int x, int y, int z, Random rand) {
-		Material material = liquid.getMaterial();
-		if(material == Material.water) return true;
-		if(material == Material.lava && worldIn.provider.isHellWorld) return true;
-		return false;
+	public static boolean fluidIsInfinite(Block block, World world) {
+		if(world.provider.isHellWorld) {
+			return InfiniteFluidsModContainer.fluidsInsideNether.contains(GameData.getBlockRegistry().getNameForObject(block)) ^ InfiniteFluidsModContainer.invertInsideNether;
+		} else {
+			return InfiniteFluidsModContainer.fluidsOutsideNether.contains(GameData.getBlockRegistry().getNameForObject(block)) ^ InfiniteFluidsModContainer.invertOutsideNether;
+		}
+	}
+
+	public static void maybeCreateSourceBlock(BlockFluidClassic block, World world, int x, int y, int z) {
+		if(!block.isSourceBlock(world, x, y, z) && fluidIsInfinite(block, world)) {
+			int adjacentSourceBlocks =
+					(block.isSourceBlock(world, x - 1, y, z) ? 1 : 0) +
+					(block.isSourceBlock(world, x + 1, y, z) ? 1 : 0) +
+					(block.isSourceBlock(world, x, y, z - 1) ? 1 : 0) +
+					(block.isSourceBlock(world, x, y, z + 1) ? 1 : 0);
+			if(adjacentSourceBlocks >= 2 && (world.getBlock(x, y - 1, z).getMaterial().isSolid() || block.isSourceBlock(world, x, y - 1, z))) {
+				world.setBlockMetadataWithNotify(x, y, z, 0, 3); // 0: source block. 3: block update and notify clients
+			}
+		}
 	}
 }

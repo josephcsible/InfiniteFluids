@@ -5,14 +5,28 @@
 ### What does this mod do?
 In vanilla Minecraft, when a water block is next to at least two source blocks,
 it becomes a source block itself, which allows collection of infinite water.
-This mod offers control over which fluids have this behavior. Currently, it
-makes lava act the same way in the Nether (as well as in mod-added dimensions
-where isHellWorld is true, if any). In future versions, this will have a
-configuration and an API for controlling which fluids are infinite.
+This mod allows you to configure which fluids have this behavior.
 
 ### How do I use this mod?
 You need Minecraft Forge installed first. Once that's done, just drop
-infinitefluids-*version*.jar in your Minecraft instance's mods/ directory.
+infinitefluids-*version*.jar in your Minecraft instance's mods/ directory and
+configure it to taste. (Configuration is not optional; if left unconfigured,
+this mod won't change anything.)
+
+### What settings does this mod have?
+You can specify lists of fluids that will be infinite, with separate lists for
+inside and outside the Nether (and any mod-added dimensions where water can't
+be placed). Alternatively, you can invert the lists, so that all fluids are
+infinite except for those specified.
+
+### What name do I use for fluids in the configuration?
+Use the name of the fluid's block that you'd use with /setblock. Examples:
+- Vanilla water is "minecraft:water"
+- Vanilla lava is "minecraft:lava"
+- BuildCraft oil is "BuildCraft|Energy:blockOil"
+- Tinkers' Construct liquified slime is "TConstruct:liquid.slime"
+If you don't know this name, you can use Waila to see it by turning on its
+"Show ID:Metadata" and "Liquids" settings.
 
 ## Development
 
@@ -22,12 +36,8 @@ directory you downloaded the source to. If you're on Windows, type
 `gradlew.bat build`. Otherwise, type `./gradlew build`. Once it's done, the mod
 will be saved to build/libs/infinitefluids-*version*.jar.
 
-### How do I develop this mod in Eclipse?
-Start a command prompt or terminal in the directory you downloaded the source
-to. If you're on Windows, type `gradlew.bat setupDecompWorkspace eclipse`.
-Otherwise, type `./gradlew setupDecompWorkspace eclipse`. Once it's done, start
-Eclipse and set the workspace to the "eclipse" subdirectory. Copy the dummy.jar
-file to the eclipse/mods/ directory.
+### When I try to run this mod from my IDE, it doesn't load!
+Copy the dummy.jar file into the IDE instance's mods/ directory.
 
 ### How can I contribute to this mod's development?
 Send pull requests. Note that by doing so, you agree to release your

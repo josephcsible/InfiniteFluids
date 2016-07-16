@@ -99,10 +99,10 @@ public class InfiniteFluidsModContainer extends DummyModContainer {
 
 	protected static void syncConfig() {
 		config.setCategoryComment(Configuration.CATEGORY_GENERAL, "Use block names (like with /setblock) here, such as minecraft:lava or TConstruct:liquid.slime.");
-		fluidsOutsideNether = new HashSet(Arrays.asList(config.getStringList("fluidsOutsideNether", Configuration.CATEGORY_GENERAL, OUTSIDE_NETHER_DEFAULT, "A list of fluids that will be infinite outside of the Nether (or any mod-added dimensions where water can't be placed)")));
+		fluidsOutsideNether = new HashSet<String>(Arrays.asList(config.getStringList("fluidsOutsideNether", Configuration.CATEGORY_GENERAL, OUTSIDE_NETHER_DEFAULT, "A list of fluids that will be infinite outside of the Nether (or any mod-added dimensions where water can't be placed)")));
 		fixVanillaFlowing(fluidsOutsideNether);
 		invertOutsideNether = config.getBoolean("invertOutsideNether", Configuration.CATEGORY_GENERAL, false, "Whether to invert the function of fluidsOutsideNether (i.e., make all fluids infinite except those listed)");
-		fluidsInsideNether = new HashSet(Arrays.asList(config.getStringList("fluidsInsideNether", Configuration.CATEGORY_GENERAL, INSIDE_NETHER_DEFAULT, "A list of fluids that will be infinite inside of the Nether (and any mod-added dimensions where water can't be placed)")));
+		fluidsInsideNether = new HashSet<String>(Arrays.asList(config.getStringList("fluidsInsideNether", Configuration.CATEGORY_GENERAL, INSIDE_NETHER_DEFAULT, "A list of fluids that will be infinite inside of the Nether (and any mod-added dimensions where water can't be placed)")));
 		fixVanillaFlowing(fluidsInsideNether);
 		invertInsideNether = config.getBoolean("invertInsideNether", Configuration.CATEGORY_GENERAL, false, "Whether to invert the function of fluidsInsideNether (i.e., make all fluids infinite except those listed)");
 		if(config.hasChanged())

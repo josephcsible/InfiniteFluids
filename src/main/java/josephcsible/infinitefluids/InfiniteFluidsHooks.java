@@ -19,20 +19,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package josephcsible.infinitefluids;
 
-import java.util.Random;
-
-import cpw.mods.fml.common.registry.GameData;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.BlockFluidClassic;
 
 public class InfiniteFluidsHooks {
 	public static boolean fluidIsInfinite(Block block, World world) {
 		if(world.provider.isHellWorld) {
-			return InfiniteFluidsModContainer.fluidsInsideNether.contains(GameData.getBlockRegistry().getNameForObject(block)) ^ InfiniteFluidsModContainer.invertInsideNether;
+			return InfiniteFluidsModContainer.fluidsInsideNether.contains(Block.blockRegistry.getNameForObject(block)) ^ InfiniteFluidsModContainer.invertInsideNether;
 		} else {
-			return InfiniteFluidsModContainer.fluidsOutsideNether.contains(GameData.getBlockRegistry().getNameForObject(block)) ^ InfiniteFluidsModContainer.invertOutsideNether;
+			return InfiniteFluidsModContainer.fluidsOutsideNether.contains(Block.blockRegistry.getNameForObject(block)) ^ InfiniteFluidsModContainer.invertOutsideNether;
 		}
 	}
 

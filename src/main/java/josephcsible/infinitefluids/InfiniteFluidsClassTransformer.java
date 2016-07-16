@@ -52,7 +52,7 @@ public class InfiniteFluidsClassTransformer implements IClassTransformer {
 		We're trying to change this:
 		if (this.field_149815_a >= 2 && this.blockMaterial == Material.water)
 		to this:
-		if (this.field_149815_a >= 2 && InfiniteFluidsHooks.shouldCreateSourceBlock(this, worldIn, x, y, z, rand))
+		if (this.field_149815_a >= 2 && InfiniteFluidsHooks.fluidIsInfinite(this, worldIn))
 
 		Here's the relevant piece of the bytecode:
 		L18

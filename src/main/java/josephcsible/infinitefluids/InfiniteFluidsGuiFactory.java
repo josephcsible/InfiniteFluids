@@ -34,8 +34,8 @@ public class InfiniteFluidsGuiFactory implements IModGuiFactory {
 		public InfiniteFluidsGuiConfig(GuiScreen parent) {
 			super(
 				parent,
-				new ConfigElement(InfiniteFluidsModContainer.config.getCategory(Configuration.CATEGORY_GENERAL)).getChildElements(),
-				InfiniteFluidsModContainer.MODID, false, false, GuiConfig.getAbridgedConfigPath(InfiniteFluidsModContainer.config.toString())
+				new ConfigElement(InfiniteFluids.config.getCategory(Configuration.CATEGORY_GENERAL)).getChildElements(),
+				InfiniteFluids.MODID, false, false, GuiConfig.getAbridgedConfigPath(InfiniteFluids.config.toString())
 			);
 		}
 	}

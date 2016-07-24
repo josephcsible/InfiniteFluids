@@ -33,9 +33,6 @@ directory you downloaded the source to. If you're on Windows, type
 `gradlew.bat build`. Otherwise, type `./gradlew build`. Once it's done, the mod
 will be saved to build/libs/infinitefluids-*version*.jar.
 
-### When I try to run this mod from my IDE, it doesn't load!
-Copy the dummy.jar file into the IDE instance's mods/ directory.
-
 ### How can I contribute to this mod's development?
 Send pull requests. Note that by doing so, you agree to release your
 contributions under this mod's license.

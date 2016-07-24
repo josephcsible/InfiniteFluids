@@ -23,64 +23,46 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.event.world.BlockEvent.CreateFluidSourceEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
-import net.minecraftforge.fml.common.DummyModContainer;
-import net.minecraftforge.fml.common.LoadController;
-import net.minecraftforge.fml.common.ModMetadata;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-public class InfiniteFluidsModContainer extends DummyModContainer {
-	public static Configuration config;
-	public static boolean invertInsideNether, invertOutsideNether;
-	public static Set<String> fluidsInsideNether, fluidsOutsideNether;
-	public static final String[] INSIDE_NETHER_DEFAULT = {}, OUTSIDE_NETHER_DEFAULT = {"minecraft:water"};
-
+@Mod(modid = InfiniteFluids.MODID, version = InfiniteFluids.VERSION, dependencies = "required-after:Forge@[12.18.1.2023,)", guiFactory = "josephcsible.infinitefluids.InfiniteFluidsGuiFactory")
+public class InfiniteFluids
+{
 	// XXX duplication with mcmod.info and build.gradle
 	public static final String MODID = "infinitefluids";
-	public static final String VERSION = "1.0.1";
+	public static final String VERSION = "1.1.0";
 
-	public InfiniteFluidsModContainer() {
-		super(new ModMetadata());
-		ModMetadata metadata = getMetadata();
-		metadata.modId = MODID;
-		metadata.version = VERSION;
-		metadata.name = "InfiniteFluids";
-		metadata.description = "Allows fluids other than water to be infinite (i.e., turn non-source blocks next to source blocks into source blocks).";
-		metadata.url = "http://minecraft.curseforge.com/projects/infinitefluids";
-		metadata.authorList.add("Joseph C. Sible");
-	}
+	public static Configuration config;
+	protected static boolean invertInsideNether, invertOutsideNether;
+	protected static Set<String> fluidsInsideNether, fluidsOutsideNether;
+	protected static final String[] INSIDE_NETHER_DEFAULT = {}, OUTSIDE_NETHER_DEFAULT = {"minecraft:water"};
 
-	@Override
-	public String getGuiClassName() {
-		return InfiniteFluidsGuiFactory.class.getName();
-	}
-
-	@Override
-	public boolean registerBus(EventBus bus, LoadController controller) {
-		bus.register(this);
-		return true;
-	}
-
-	@Subscribe
-	public void preInit(FMLPreInitializationEvent event) {
+	@EventHandler
+	public static void preInit(FMLPreInitializationEvent event) {
 		config = new Configuration(event.getSuggestedConfigurationFile());
 		syncConfig();
 	}
 
-	@Subscribe
-	public void init(FMLInitializationEvent event) {
-		MinecraftForge.EVENT_BUS.register(this);
+	@EventHandler
+	public static void init(FMLInitializationEvent event)
+	{
+		MinecraftForge.EVENT_BUS.register(InfiniteFluids.class);
 	}
 
 	@SubscribeEvent
-	public void onConfigChanged(OnConfigChangedEvent eventArgs) {
+	public static void onConfigChanged(OnConfigChangedEvent eventArgs) {
 		if(eventArgs.getModID().equals(MODID))
 			syncConfig();
 	}
@@ -106,5 +88,26 @@ public class InfiniteFluidsModContainer extends DummyModContainer {
 		invertInsideNether = config.getBoolean("invertInsideNether", Configuration.CATEGORY_GENERAL, false, "Whether to invert the function of fluidsInsideNether (i.e., make all fluids infinite except those listed)");
 		if(config.hasChanged())
 			config.save();
+	}
+
+	protected static boolean fluidIsInfinite(Block block, World world) {
+		if(world.provider.doesWaterVaporize()) {
+			return fluidsInsideNether.contains(Block.REGISTRY.getNameForObject(block).toString()) ^ invertInsideNether;
+		} else {
+			return fluidsOutsideNether.contains(Block.REGISTRY.getNameForObject(block).toString()) ^ invertOutsideNether;
+		}
+	}
+
+	@SubscribeEvent
+	public static void onCreateFluidSource(CreateFluidSourceEvent event) {
+		Block block = event.getState().getBlock();
+		// Be careful not to change the result if it's the default anyway, so we don't unnecessarily interfere with other mods.
+		if(fluidIsInfinite(block, event.getWorld())) {
+			if(block != Blocks.FLOWING_WATER) {
+				event.setResult(Result.ALLOW);
+			}
+		} else if(block == Blocks.FLOWING_WATER) {
+			event.setResult(Result.DENY);
+		}
 	}
 }

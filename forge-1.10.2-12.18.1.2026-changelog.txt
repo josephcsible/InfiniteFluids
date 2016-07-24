@@ -1,5 +1,75 @@
 Changelog:
-Build 2014:
+Build 2026:
+	vincent.lee: Add ability for custom detector rail output
+	vincent.lee: Move to a hook in EntityMinecart
+	vincent.lee: Remove event stuff
+
+Build 1.10.2-12.18.1.2025:
+	mezz: Force mipmap even if textures are the wrong size
+	mezz: Add TextureDump forge test mod
+
+Build 1.10.2-12.18.1.2024:
+	vincent.lee: Add hand-specific render event
+	vincent.lee: Add missing cancelable
+	cpw: Rename the event to RenderSpecificHandEvent
+
+Build 1.10.2-12.18.1.2023:
+	josephcsible: Add CreateFluidSourceEvent to control infinite fluid sources
+	josephcsible: Add a test for CreateFluidSourceEvent
+	josephcsible: Use CreateFluidSourceEvent for mod fluids as well
+
+Build 1.10.2-12.18.1.2022:
+	mezz: Fix hotkey with default modifier loading wrong when modifier set to NONE
+
+Build 1.10.2-12.18.1.2021:
+	bernhard.bonigl:
+		Add shouldCauseBlockBreakReset callback to Item. This allows to keep
+		breaking blocks if the NBT or similar changes.
+
+Build 1.10.2-12.18.1.2020:
+	Mumfrey: Store member field mappings in the mapping table, possible fix for #3043
+
+Build 1.10.2-12.18.1.2019:
+	cpw:
+		Something that needs to happen: warn people about bad modids- if they're
+		not lowercased, or if they're too long.
+
+Build 1.10.2-12.18.1.2018:
+	ezterry3:
+		Fix async race condition on new chunks (closes #3020) (#3090)
+		This patch fixes a race condition that sometimes caused a just generated
+		chunk
+		structures to
+		generated version
+		chunk.
+		 This patch ensures when ProvideChunk calls LoadChunk synchronously we
+		always
+		condition without
+		already saved to disk.
+		 Thus this should retain the async functionality from PR #2946 while
+		preventing
+
+Build 1.10.2-12.18.1.2017:
+	cpw:
+		Some test harness stuffs. Time to get the registry manager properly
+		tested.
+	cpw:
+		More tests. Substitutions now work, and a fix is included. *sigh* Closes
+		too many bugs to count.
+	cpw: Some more substitution tests. It seems like it's working as it should.
+	cpw: Some dummy block replacement tests - it seems they work correctly.
+	cpw: Add the new tests into the suite
+	cpw:
+		Some tweaks to ContainedDeps - it should extract to a file in
+		versionedMods directly, even if the tag in the jar has a subpath
+		element. It'll also skip if there is a matching filename in the main
+		mods dir.
+
+Build 1.10.2-12.18.1.2016-failtests:
+	cpw: Some more substitution tests. It seems like it's working as it should.
+	cpw: Some dummy block replacement tests - it seems they work correctly.
+
+Build 1.10.2-12.18.1.2014:
 	LexManos:
 		Added support for using static methods as event listeners, Register the
 		.class instead of an instance. And added an improvement to calltime

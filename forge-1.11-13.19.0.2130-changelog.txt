@@ -1,5 +1,20 @@
 Changelog:
-Build 2125:
+Build 2130:
+	LexManos:
+		Fix build.gradle problems: Installer missing url.png UploadArchives
+		erroring on local systems due to missing changelog Adding branch name
+		improperly.
+
+Build 1.11-13.19.0.2129-1.11.x:
+	LexManos: Fix localizations not loading correctly in legacy resource packs.
+
+Build 1.11-13.19.0.2128-1.11.x:
+	LexManos: Fix FurnaceRecipy registration.
+
+Build 1.11-13.19.0.2127-1.11.x:
+	LexManos: Fixed test cases for 1.11 changes.
+
+Build 1.10.2-12.18.2.2125:
 	cpw: Update to 20161111 mcp names
 	cpw: regenerate entitylivingbase patch
 

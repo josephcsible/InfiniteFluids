@@ -37,7 +37,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Mod(modid = InfiniteFluids.MODID, version = InfiniteFluids.VERSION, dependencies = "required-after:Forge@[12.18.1.2023,)", guiFactory = "josephcsible.infinitefluids.InfiniteFluidsGuiFactory")
+@Mod(modid = InfiniteFluids.MODID, version = InfiniteFluids.VERSION, guiFactory = "josephcsible.infinitefluids.InfiniteFluidsGuiFactory")
 public class InfiniteFluids
 {
 	// XXX duplication with mcmod.info and build.gradle

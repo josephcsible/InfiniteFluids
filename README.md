@@ -28,6 +28,11 @@ Use the name of the fluid's block that you'd use with /setblock. Examples:
 If you don't know this name, you can use Waila to see it by turning on its
 "Show ID:Metadata" and "Liquids" settings.
 
+### When using pumps, why do infinite fluid sources run out?
+Your pumps are probably taking source blocks faster than they regenerate. Try
+using a larger source pool. This will allow multiple source blocks to
+regenerate at the same time, so they can keep up with the pumps.
+
 ## Development
 
 ### How do I compile this mod from source?

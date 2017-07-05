@@ -25,6 +25,11 @@ Use the name of the fluid's block that you'd use with /setblock. Examples:
 - Vanilla lava is "minecraft:lava"
 - Tinkers' Construct liquid blue slime is "tconstruct:blueslime"
 
+### When using pumps, why do infinite fluid sources run out?
+Your pumps are probably taking source blocks faster than they regenerate. Try
+using a larger source pool. This will allow multiple source blocks to
+regenerate at the same time, so they can keep up with the pumps.
+
 ## Development
 
 ### How do I compile this mod from source?
